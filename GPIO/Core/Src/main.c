@@ -97,21 +97,20 @@ int main(void) {
 	GPIO_PinState StateSW2[2];
 
 	GPIO_PinState StateSW3[2];
-	uint16_t LED3_TimeRelay = 500;													// LED-D5 Start with High 0.5 sec
+	uint16_t LED3_Delay = 500;													// LED-D5 Start with High 0.5 sec
 	uint32_t TimeStamp2 = 0;
 	uint8_t SW3counter = 1;
 /* ==================================================================== VARIABLE ===================================================================== */
-		GPIO_PinState StateSW1[2];
 
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-	while (1) {
+	while (1)
+	{
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-
 /* ===================================================================== LED-D1 ====================================================================== */
 		if (HAL_GetTick() - ButtonTimeStamp >= 100)	//ms
 		{
@@ -139,6 +138,19 @@ int main(void) {
 			}
 		}
 		StateSW1[1] = StateSW1[0];
+/* =================================================================== RUN LED-D1 ==================================================================== */
+		if (HAL_GetTick() - TimeStamp >= LED1_HalfPeriod)
+		{
+			TimeStamp = HAL_GetTick();
+			if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9) == GPIO_PIN_SET)
+			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+			}
+			else
+			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+			}
+		}
 /* ===================================================================== LED-D3 ====================================================================== */
 		StateSW2[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
 		if (StateSW2[1] == GPIO_PIN_SET && StateSW2[0] == GPIO_PIN_RESET)
@@ -153,64 +165,50 @@ int main(void) {
 			}
 		}
 		StateSW2[1] = StateSW2[0];
-
-/* =================================================================== RUN LED-D1 ==================================================================== */
-		if (HAL_GetTick() - TimeStamp >= LED1_HalfPeriod)
-		{
-			TimeStamp = HAL_GetTick();
-			if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9) == GPIO_PIN_SET)
-			{
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-			}
-			else
-			{
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-			}
-		}
-/* ===================================================================== LED-D5 ======================================================================*/
+/* ===================================================================== LED-D5 ====================================================================== */
 		StateSW3[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5);
 		if(StateSW3[1] == GPIO_PIN_SET && StateSW3[0] == GPIO_PIN_RESET)
 		{
 			if(SW3counter == 1)
 			{
-				LED3_TimeRelay = 1500;
-				SW3counter == 2;
+				SW3counter = 2;
+				LED3_Delay = 1500;
 			}
-			else if(SW3counter == 2)
+			else
 			{
-				LED3_TimeRelay = 500;
-				SW3counter == 1;
+				SW3counter = 1;
+				LED3_Delay = 500;
 			}
 		}
 		StateSW3[1] = StateSW3[0];
-/* =================================================================== RUN LED-D5 ====================================================================*/
-		if(HAL_GetTick() - TimeStamp2 >= LED3_TimeRelay)
+/* =================================================================== RUN LED-D5 ==================================================================== */
+		if(HAL_GetTick() - TimeStamp2 >= LED3_Delay)
 		{
 			TimeStamp2 = HAL_GetTick();
-			if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_SET)
+			if(SW3counter == 1)
 			{
-				if(LED3_TimeRelay == 500)
+				if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_SET)
 				{
-					LED3_TimeRelay = 1500;
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6) = GPIO_PIN_RESET;
+					LED3_Delay = 1500;
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
 				}
-				else if(LED3_TimeRelay == 1500)
+				else if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_RESET)
 				{
-					LED3_TimeRelay = 500;
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6) = GPIO_PIN_RESET;
+					LED3_Delay = 500;
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
 				}
 			}
-			else if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_RESET)
+			else if(SW3counter == 2)
 			{
-				if(LED3_TimeRelay == 1500)
+				if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_SET)
 				{
-					LED3_TimeRelay = 500;
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6) = GPIO_PIN_SET;
+					LED3_Delay = 500;
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
 				}
-				else if(LED3_TimeRelay == 500)
+				else if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_RESET)
 				{
-					LED3_TimeRelay = 1500;
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6) = GPIO_PIN_SET;
+					LED3_Delay = 1500;
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
 				}
 			}
 		}
